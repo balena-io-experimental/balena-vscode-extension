@@ -4,47 +4,26 @@ import * as vscode from 'vscode';
 import * as scan from './lib/scan';
 
 import BalenaDevicesDataProvider, { BalenaDeviceItem } from './providers/balena-devices-treedata';
+import BalenaPanelManager from './panels/balena-panel-manager';
+import { livePush, ssh } from './lib/commands';
 
 (async () => {
 	await scan.initialized;
 })();
 
 export function activate(context: vscode.ExtensionContext) {
+	let panelManager: BalenaPanelManager = new BalenaPanelManager(context);
 	vscode.window.registerTreeDataProvider('balenaDevices', new BalenaDevicesDataProvider());
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('balena.livePush', ({ addresses }: BalenaDeviceItem) => {
-			const [address] = addresses.filter(a => !a.includes(':'));
-			if (!address) {
-				return;
-			}
-
-			const [workspace] = vscode.workspace.workspaceFolders!;
-			if (!workspace) {
-				return;
-			}
-
-			const task = new vscode.Task(
-				{ type: 'livepush' },
-				workspace,
-				'livepush',
-				'livepush',
-				new vscode.ShellExecution(`balena push ${address} -m`)
-			);
-			vscode.tasks.executeTask(task);
-		})
+		vscode.commands.registerCommand('balena.livePush', livePush)
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('balena.ssh', ({ addresses }: BalenaDeviceItem) => {
-			const [address] = addresses.filter(a => !a.includes(':'));
-			if (!address) {
-				return;
-			}
+		vscode.commands.registerCommand('balena.ssh', ssh)
+	);
 
-			const terminal = vscode.window.createTerminal('SSH');
-			terminal.show();
-			terminal.sendText(`balena ssh ${address}`);
-		})
+	context.subscriptions.push(
+		vscode.commands.registerCommand('balena.openDevicePanel', (name, host, addresses) => panelManager.createOrShowDevicePanel(name, host, addresses))
 	);
 }
