@@ -1,6 +1,8 @@
+import fetch from 'node-fetch';
 import * as vscode from 'vscode';
+
 import * as scan from '../lib/scan';
-import { icons } from '../lib/resources';
+import { icons, deviceIcon } from '../lib/resources';
 
 (async () => {
     await scan.initialized;
@@ -10,7 +12,7 @@ interface Collection<T> {
     [k: string]: T,
 }
 
-export default class BalenaDevicesDataProvider implements vscode.TreeDataProvider<BalenaDeviceItem> {
+export default class BalenaDevicesDataProvider implements vscode.TreeDataProvider<TreeableItem> {
     private devices: Collection<BalenaDeviceItem> = {};
     
     _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
@@ -35,6 +37,9 @@ export default class BalenaDevicesDataProvider implements vscode.TreeDataProvide
         }
 
         this.devices[host] = new BalenaDeviceItem(name, host, addresses);
+        this.devices[host].getDeviceInfo(() => {
+            this._onDidChangeTreeData.fire();
+        });
         this._onDidChangeTreeData.fire();
     }
 
@@ -49,17 +54,49 @@ export default class BalenaDevicesDataProvider implements vscode.TreeDataProvide
 
     onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
     
-    getTreeItem(element: BalenaDeviceItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    getTreeItem(element: TreeableItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element;
     }
 
-    getChildren(element?: BalenaDeviceItem): vscode.ProviderResult<BalenaDeviceItem[]> {
+    getChildren(element?: TreeableItem): vscode.ProviderResult<TreeableItem[]> {
         if (element === undefined) {
             const devices = Object.getOwnPropertyNames(this.devices).map(k => this.devices[k]);
-            return devices;
+            return [
+                new GroupItem('Local', devices, { icon: icons.balena }),
+                new GroupItem('Remote', [
+                    new GroupItem('Applications', [
+                        new GroupItem('my-new-hotness', [], { icon: deviceIcon('raspberrypi4-64') }),
+                        new GroupItem('my-old-busted', [], { icon: deviceIcon('raspberrypi3') }),
+                    ]),
+                ], { icon: icons.balena, description: 'balena-cloud.com' }),
+            ];
+        }
+
+        if (element instanceof GroupItem) {
+            return element.devices;
         }
 
         return null;
+    }
+}
+
+type TreeableItem = GroupItem | BalenaDeviceItem;
+
+class GroupItem extends vscode.TreeItem {
+    constructor(public title: string, public devices: TreeableItem[], options?: Partial<{
+        icon: string,
+        description: string
+    }>) {
+        super(title, vscode.TreeItemCollapsibleState.Expanded);
+        const opts: {
+            icon?: string
+            description?: string
+        } = {
+            ...options
+        };
+
+        this.iconPath = opts.icon;
+        this.description = opts.description;
     }
 }
 
@@ -67,9 +104,24 @@ export class BalenaDeviceItem extends vscode.TreeItem {
     constructor(public name: string, public host: string, public addresses: string[]) {
         super(name);
         
-        this.description = addresses.join(', ');
-        this.iconPath = icons.balena;
-        this.contextValue = 'device';
+        this.description = addresses.filter(a => !a.includes(':')).join(', ');
+        this.iconPath = deviceIcon('generic');
+        this.contextValue = 'unknown-device';
+    }
+
+    public getDeviceInfo(done: Function): Promise<void> {
+        return fetch(`http://${this.host}:48484/v2/local/device-info`)
+            .then(res => res.json())
+            .then(json => {
+                this.iconPath = deviceIcon(json.info.deviceType);
+                this.contextValue = 'device';
+                done();
+            })
+            .catch(err => {
+                setTimeout(() => {
+                    this.getDeviceInfo(done);
+                }, 2000);
+            });
     }
 }
 

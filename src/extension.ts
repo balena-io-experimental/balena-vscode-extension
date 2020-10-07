@@ -12,8 +12,6 @@ import BalenaDevicesDataProvider, { BalenaDeviceItem } from './providers/balena-
 let livepushCommand: vscode.Disposable | undefined;
 let sshCommand: vscode.Disposable | undefined;
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 		
 	vscode.window.registerTreeDataProvider('balenaDevices', new BalenaDevicesDataProvider());
@@ -23,10 +21,20 @@ export function activate(context: vscode.ExtensionContext) {
 		if (!address) {
 			return;
 		}
-		
-		const terminal = vscode.window.createTerminal('LivePush');
-		terminal.show();
-		terminal.sendText(`balena push ${address}`);
+
+		const [workspace] = vscode.workspace.workspaceFolders!;
+        if (!workspace) {
+            return;
+        }
+
+		const task = new vscode.Task(
+			{ type: 'livepush' },
+			workspace,
+			'livepush',
+			'livepush',
+			new vscode.ShellExecution(`balena push ${address} -m`)
+		);
+		vscode.tasks.executeTask(task);
 	});
 
 	sshCommand = vscode.commands.registerCommand('balena.ssh', ({ addresses }: BalenaDeviceItem) => {
