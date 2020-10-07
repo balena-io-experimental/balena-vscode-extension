@@ -21,7 +21,6 @@ interface BalenaDeviceCollection {
 }
 
 interface BonjourEvents {
-    newService: (name: string, host: string, addresses: string[]) => void;
     deviceFound: (device: BalenaDevice) => void;
     deviceLost: (device: BalenaDevice) => void;
 }
@@ -48,6 +47,10 @@ export const initialized = (async () => {
 
     const findDevices = () => {
         bonjour().find({ type: 'ssh' }, (service) => {
+            if (service.port !== 22222) {
+                return;
+            }
+            
             const now = new Date().getTime();
             const newDevice: BalenaDevice = { createdAt: now, updatedAt: now, name: service.name, host: service.host, addresses: service.addresses };
             

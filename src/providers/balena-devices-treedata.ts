@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import * as scan from './lib/scan';
-import { icons } from './lib/resources';
-import { SuiteConstants } from 'mocha';
+import * as scan from '../lib/scan';
+import { icons } from '../lib/resources';
 
 (async () => {
     await scan.initialized;
@@ -11,7 +10,7 @@ interface Collection<T> {
     [k: string]: T,
 }
 
-export default class BalenaActivityProvider implements vscode.TreeDataProvider<BalenaDeviceItem> {
+export default class BalenaDevicesDataProvider implements vscode.TreeDataProvider<BalenaDeviceItem> {
     private devices: Collection<BalenaDeviceItem> = {};
     
     _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
@@ -31,7 +30,6 @@ export default class BalenaActivityProvider implements vscode.TreeDataProvider<B
     }
 
     handleDeviceFound({ name, host, addresses }: scan.BalenaDevice) {
-        console.log('Device Found', { name, host, addresses });
         if (this.devices[host]) {
             return;
         }
@@ -41,8 +39,6 @@ export default class BalenaActivityProvider implements vscode.TreeDataProvider<B
     }
 
     handleDeviceLost({ name, host, addresses }: scan.BalenaDevice) {
-        console.log('Device Lost', { name, host, addresses });
-
         if (!this.devices[host]) {
             return;
         }
@@ -60,7 +56,6 @@ export default class BalenaActivityProvider implements vscode.TreeDataProvider<B
     getChildren(element?: BalenaDeviceItem): vscode.ProviderResult<BalenaDeviceItem[]> {
         if (element === undefined) {
             const devices = Object.getOwnPropertyNames(this.devices).map(k => this.devices[k]);
-            console.log('Device Items', devices);
             return devices;
         }
 
@@ -71,6 +66,8 @@ export default class BalenaActivityProvider implements vscode.TreeDataProvider<B
 export class BalenaDeviceItem extends vscode.TreeItem {
     constructor(public name: string, public host: string, public addresses: string[]) {
         super(name);
+        
+        this.description = addresses.join(', ');
         this.iconPath = icons.balena;
         this.contextValue = 'device';
     }

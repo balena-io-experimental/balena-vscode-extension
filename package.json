@@ -10,31 +10,44 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onStartupFinished"
+		"onView:balenaDevices",
+		"onCommand:workbench.action.tasks.runTask"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"taskDefinitions": [
+			{
+				"type": "livepush",
+				"required": [
+					"host"
+				],
+				"properties": {
+					"host": {
+						"type": "string",
+						"description": "The host to livepush the workspace to."
+					}
+				}
+			}
+		],
 		"commands": [
 			{
 				"command": "balena.livePush",
-				"title": "LivePush"
+				"title": "LivePush",
+				"icon": "resources/livepush.svg"
+
+			},
+			{
+				"command": "balena.ssh",
+				"title": "SSH",
+				"icon": "resources/terminal.svg"
 			}
 		],
-		"viewsContainers": {
-			"activitybar": [
-				{
-					"id": "balena-activity",
-					"title": "balena",
-					"icon": "media/balena.png"
-				}
-			]
-		},
 		"views": {
 			"explorer": [
 				{
-					"id": "balenaActivity",
+					"id": "balenaDevices",
 					"name": "balena",
-					"icon": "media/balena.png"
+					"icon": "resources/balena.png"
 				}
 			]
 		},
@@ -42,7 +55,13 @@
 			"view/item/context": [
 				{
 					"command": "balena.livePush",
-					"when": "view == balenaActivity && viewItem == device"
+					"when": "view == balenaDevices && viewItem == device",
+					"group": "inline"
+				},
+				{
+					"command": "balena.ssh",
+					"when": "view == balenaDevices && viewItem == device",
+					"group": "inline"
 				}
 			]
 		}
