@@ -24,7 +24,7 @@ export default class BalenaDevicePanel extends EventEmitter {
     this.panel.iconPath = vscode.Uri.file(deviceIcon(device.deviceInfo.deviceType ?? 'unknown'));
     this.panel.onDidDispose(() => this.emit('disposed', this.device.name));
     this.panel.webview.onDidReceiveMessage(
-      message => {
+      async message => {
         switch (message.command) {
           case 'ssh':
             ssh(this.device);
@@ -33,7 +33,12 @@ export default class BalenaDevicePanel extends EventEmitter {
             livePush(this.device);
             return;
           case 'reset':
-            reset(this.device);
+            const name = await vscode.window.showInputBox({ prompt: 'New device name', value: this.device.deviceInfo.deviceName })
+            if (name === undefined) {
+              return;
+            }
+            
+            reset(this.device, name);
             return;
         }
       }

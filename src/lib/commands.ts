@@ -62,7 +62,7 @@ export const logs = ({ serviceName, device}: BalenaDeviceServiceItem) => {
   vscode.tasks.executeTask(task);
 };
 
-export const reset = async ({ addresses, deviceInfo }: BalenaDeviceItem) => {
+export const reset = async ({ addresses, name: deviceName }: BalenaDeviceItem, name?: string) => {
   const [address] = addresses.filter(a => !a.includes(':'));
   if (!address) {
     return;
@@ -79,7 +79,7 @@ export const reset = async ({ addresses, deviceInfo }: BalenaDeviceItem) => {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         local: {
-          name: deviceInfo.deviceName ?? 'my-device',
+          name: name ?? deviceName,
           apps: {},
           config: {},
         },
