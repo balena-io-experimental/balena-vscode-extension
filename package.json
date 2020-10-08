@@ -1,5 +1,6 @@
 {
 	"name": "balena-vscode",
+	"publisher": "balena",
 	"displayName": "balena-vscode",
 	"description": "Balena in VSCode",
 	"version": "0.0.1",
