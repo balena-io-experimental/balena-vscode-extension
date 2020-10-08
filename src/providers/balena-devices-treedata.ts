@@ -68,9 +68,7 @@ export default class BalenaDevicesDataProvider implements vscode.TreeDataProvide
                 new GroupItem('Local', devices, { icon: icons.balena }),
                 new GroupItem('Remote', [
                     new GroupItem('Applications', [
-                        new GroupItem('my-new-hotness', [
-                            new BalenaDeviceItem(this, "test","test.local", ["127.0.0.1"]),
-                        ], { icon: deviceIcon('raspberrypi4-64') }),
+                        new GroupItem('my-new-hotness', [], { icon: deviceIcon('raspberrypi4-64') }),
                         new GroupItem('my-old-busted', [], { icon: deviceIcon('raspberrypi3') }),
                     ]),
                 ], { icon: icons.balena, description: 'balena-cloud.com' }),
