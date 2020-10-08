@@ -1,8 +1,8 @@
-import fetch from 'node-fetch';
 import * as vscode from 'vscode';
 
 import * as scan from '../lib/scan';
 import { icons, deviceIcon } from '../lib/resources';
+import { getDeviceInfo, DeviceInfo } from '../lib/device-info';
 
 (async () => {
     await scan.initialized;
@@ -20,7 +20,7 @@ export default class BalenaDevicesDataProvider implements vscode.TreeDataProvide
     constructor() {
 
         scan.getDevices().forEach(({ name, host, addresses }) => {
-            this.devices[host] = new BalenaDeviceItem(name, host, addresses);
+            this.devices[host] = new BalenaDeviceItem(this, name, host, addresses);
         });
 
         scan.events.on('deviceFound', (device) => {
@@ -36,10 +36,7 @@ export default class BalenaDevicesDataProvider implements vscode.TreeDataProvide
             return;
         }
 
-        this.devices[host] = new BalenaDeviceItem(name, host, addresses);
-        this.devices[host].getDeviceInfo(() => {
-            this._onDidChangeTreeData.fire();
-        });
+        this.devices[host] = new BalenaDeviceItem(this, name, host, addresses);
         this._onDidChangeTreeData.fire();
     }
 
@@ -49,6 +46,10 @@ export default class BalenaDevicesDataProvider implements vscode.TreeDataProvide
         }
 
         delete this.devices[host];
+        this._onDidChangeTreeData.fire();
+    }
+
+    public updateView() {
         this._onDidChangeTreeData.fire();
     }
 
@@ -101,32 +102,32 @@ class GroupItem extends vscode.TreeItem {
 }
 
 export class BalenaDeviceItem extends vscode.TreeItem {
-    constructor(public name: string, public host: string, public addresses: string[]) {
+    public deviceInfo: Partial<DeviceInfo>;
+    constructor(private provider: BalenaDevicesDataProvider, public name: string, public host: string, public addresses: string[]) {
         super(name);
-
+        this.deviceInfo = {};
         this.description = addresses.filter(a => !a.includes(':')).join(', ');
         this.iconPath = deviceIcon('generic');
         this.contextValue = 'unknown-device';
         this.command = {
             command: 'balena.openDevicePanel',
             title: 'Open balena device panel',
-            arguments: [name, host, addresses]
+            arguments: [this],
         };
-    }
 
-    public getDeviceInfo(done: Function): Promise<void> {
-        return fetch(`http://${this.host}:48484/v2/local/device-info`)
-            .then(res => res.json())
-            .then(json => {
-                this.iconPath = deviceIcon(json.info.deviceType);
-                this.contextValue = 'device';
-                done();
-            })
-            .catch(err => {
-                setTimeout(() => {
-                    this.getDeviceInfo(done);
-                }, 2000);
-            });
+        getDeviceInfo(host, (newInfo) => {
+            this.deviceInfo = {
+                ...this.deviceInfo,
+                ...newInfo,
+            };
+
+            // update our view elements...
+            this.iconPath = deviceIcon(this.deviceInfo.deviceType ?? 'generic');
+            this.contextValue = this.deviceInfo.localMode ? 'device' : 'unknown-device';
+
+            // refresh the tree...
+            this.provider.updateView();
+        });
     }
 }
 

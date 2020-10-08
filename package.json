@@ -19,12 +19,12 @@
 			{
 				"command": "balena.livePush",
 				"title": "LivePush",
-				"icon": "resources/livepush.svg"
+				"icon": "resources/icons/livepush.svg"
 			},
 			{
 				"command": "balena.ssh",
 				"title": "SSH",
-				"icon": "resources/terminal.svg"
+				"icon": "resources/icons/terminal.svg"
 			}
 		],
 		"views": {
@@ -32,7 +32,7 @@
 				{
 					"id": "balenaDevices",
 					"name": "balena",
-					"icon": "resources/balena.png"
+					"icon": "resources/icons/balena.png"
 				}
 			]
 		},

@@ -24,6 +24,6 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand('balena.openDevicePanel', (name, host, addresses) => panelManager.createOrShowDevicePanel(name, host, addresses))
+		vscode.commands.registerCommand('balena.openDevicePanel', (device: BalenaDeviceItem) => panelManager.createOrShowDevicePanel(device))
 	);
 }

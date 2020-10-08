@@ -1,9 +1,8 @@
 import * as bonjour from 'bonjour';
-import { DH_CHECK_P_NOT_SAFE_PRIME } from 'constants';
 import { EventEmitter } from 'events';
 import StrictEventEmitter from 'strict-event-emitter-types';
 
-const LIFETIME = 15000;     // 15 seconds
+const LIFETIME = 60000;     // 1 minute
 
 type Expirable = {
     createdAt: number,
