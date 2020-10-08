@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import * as vscode from 'vscode';
 
 import { icons, scripts } from '../lib/resources';
-import { livePush, ssh } from '../lib/commands';
+import { livePush, reset, ssh } from '../lib/commands';
 import { BalenaDeviceItem } from '../providers/balena-devices-treedata';
 
 export default class BalenaDevicePanel extends EventEmitter {
@@ -32,6 +32,9 @@ export default class BalenaDevicePanel extends EventEmitter {
           case 'livepush':
             livePush(this.device);
             return;
+          case 'reset':
+            reset(this.device);
+            return;
         }
       }
     );
@@ -59,6 +62,7 @@ export default class BalenaDevicePanel extends EventEmitter {
                 <h3>Actions</h3>
                 <button type="button" onclick="livepush()">LivePush</button>
                 <button type="button" onclick="ssh()">SSH</button>
+                <button type="button" onclick="reset()">Reset</button>
                 <div id='container'></div>
                 <script src="${scriptUri}"></script>
               </body>
