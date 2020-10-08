@@ -11,3 +11,9 @@ function livepush () {
     command: 'livepush'
   });
 }
+
+function reset () {
+  vscode.postMessage({
+    command: 'reset'
+  });
+}

@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 import * as vscode from 'vscode';
 
-import { icons, scripts } from '../lib/resources';
-import { livePush, ssh } from '../lib/commands';
+import { deviceIcon, icons, scripts } from '../lib/resources';
+import { livePush, reset, ssh } from '../lib/commands';
 import { BalenaDeviceItem } from '../providers/balena-devices-treedata';
 
 export default class BalenaDevicePanel extends EventEmitter {
@@ -21,7 +21,7 @@ export default class BalenaDevicePanel extends EventEmitter {
       }
     );
     this.panel.webview.html = this.getHtmlForWebview();
-    this.panel.iconPath = vscode.Uri.file(icons.balena);
+    this.panel.iconPath = vscode.Uri.file(deviceIcon(device.deviceInfo.deviceType ?? 'unknown'));
     this.panel.onDidDispose(() => this.emit('disposed', this.device.name));
     this.panel.webview.onDidReceiveMessage(
       message => {
@@ -31,6 +31,9 @@ export default class BalenaDevicePanel extends EventEmitter {
             return;
           case 'livepush':
             livePush(this.device);
+            return;
+          case 'reset':
+            reset(this.device);
             return;
         }
       }
@@ -59,6 +62,7 @@ export default class BalenaDevicePanel extends EventEmitter {
                 <h3>Actions</h3>
                 <button type="button" onclick="livepush()">LivePush</button>
                 <button type="button" onclick="ssh()">SSH</button>
+                <button type="button" onclick="reset()">Reset</button>
                 <div id='container'></div>
                 <script src="${scriptUri}"></script>
               </body>

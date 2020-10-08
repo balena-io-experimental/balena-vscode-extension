@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import * as vscode from 'vscode';
-import { deviceIcon } from './resources';
 
 export type DeviceInfoComponent = {
     type: 'service' | 'application',
@@ -61,12 +60,12 @@ export async function getDeviceInfo(host: string, callback: (info: Partial<Devic
 
         console.log('latestInfo', latestInfo);
 
-    } catch (err) {
-        console.log(err);
+    } catch {
+        
+    } finally {   
+        callback(latestInfo);
+        setTimeout(() => {
+            getDeviceInfo(host, callback);
+        }, 3000);
     }
-    
-    callback(latestInfo);
-    setTimeout(() => {
-        getDeviceInfo(host, callback);
-    }, 3000);
 }

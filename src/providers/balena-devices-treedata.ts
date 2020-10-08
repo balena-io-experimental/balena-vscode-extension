@@ -68,9 +68,7 @@ export default class BalenaDevicesDataProvider implements vscode.TreeDataProvide
                 new GroupItem('Local', devices, { icon: icons.balena }),
                 new GroupItem('Remote', [
                     new GroupItem('Applications', [
-                        new GroupItem('my-new-hotness', [
-                            new BalenaDeviceItem(this, "test","test.local", ["127.0.0.1"]),
-                        ], { icon: deviceIcon('raspberrypi4-64') }),
+                        new GroupItem('my-new-hotness', [], { icon: deviceIcon('raspberrypi4-64') }),
                         new GroupItem('my-old-busted', [], { icon: deviceIcon('raspberrypi3') }),
                     ]),
                 ], { icon: icons.balena, description: 'balena-cloud.com' }),
@@ -106,24 +104,23 @@ class GroupItem extends vscode.TreeItem {
 export class BalenaDeviceItem extends vscode.TreeItem {
     public deviceInfo: Partial<DeviceInfo>;
     public children: TreeableItem[];
+    public address: string;
 
     private defaultIcon = deviceIcon('unknown-color');
 
     constructor(private provider: BalenaDevicesDataProvider, public name: string, public host: string, public addresses: string[]) {
         super(name, vscode.TreeItemCollapsibleState.None);
+
+        [ this.address ] = addresses.filter(a => !a.includes(':'));
             
         this.deviceInfo = {};
         this.description = addresses.filter(a => !a.includes(':')).join(', ');
         this.iconPath = this.defaultIcon;
         this.contextValue = 'unknown-device';
-        this.command = {
-            command: 'balena.openDevicePanel',
-            title: 'Open balena device panel',
-            arguments: [this],
-        };
+        
         this.children = [];
 
-        getDeviceInfo(host, (newInfo) => {
+        getDeviceInfo(this.address, (newInfo) => {
             this.deviceInfo = {
                 ...this.deviceInfo,
                 ...newInfo,
@@ -133,6 +130,12 @@ export class BalenaDeviceItem extends vscode.TreeItem {
             if (this.deviceInfo.localMode !== true) {
                 return this.provider.updateView();
             }
+            
+            this.command = {
+                command: 'balena.openDevicePanel',
+                title: 'Open balena device panel',
+                arguments: [this],
+            };
             
             this.contextValue = this.deviceInfo.localMode === true ? 'device' : 'unknown-device';
 
@@ -165,6 +168,7 @@ export class BalenaDeviceServiceItem extends vscode.TreeItem {
     constructor(label: string, public serviceName: string, public device: BalenaDeviceItem) {
         super(label, vscode.TreeItemCollapsibleState.None);
         this.iconPath = this.defaultIcon;
+        this.contextValue = 'service';
 
         this.command = {
             command: 'balena.logs',

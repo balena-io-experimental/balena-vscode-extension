@@ -29,6 +29,11 @@
 				"title": "SSH",
 				"icon": "resources/icons/terminal.svg",
 				"category": "balena"
+			},
+			{
+				"command": "balena.reset",
+				"title": "Reset device state",
+				"category": "balena"
 			}
 		],
 		"views": {
@@ -50,6 +55,11 @@
 				{
 					"command": "balena.ssh",
 					"when": "view == balenaDevices && viewItem == device",
+					"group": "inline"
+				},
+				{
+					"command": "balena.ssh",
+					"when": "view == balenaDevices && viewItem == service",
 					"group": "inline"
 				}
 			]
