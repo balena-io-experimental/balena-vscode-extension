@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import * as vscode from 'vscode';
 
 export type DeviceInfoComponent = {
     type: 'service' | 'application',

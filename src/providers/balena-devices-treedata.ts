@@ -106,11 +106,14 @@ class GroupItem extends vscode.TreeItem {
 export class BalenaDeviceItem extends vscode.TreeItem {
     public deviceInfo: Partial<DeviceInfo>;
     public children: TreeableItem[];
+    public address: string;
 
     private defaultIcon = deviceIcon('unknown-color');
 
     constructor(private provider: BalenaDevicesDataProvider, public name: string, public host: string, public addresses: string[]) {
         super(name, vscode.TreeItemCollapsibleState.None);
+
+        [ this.address ] = addresses.filter(a => !a.includes(':'));
             
         this.deviceInfo = {};
         this.description = addresses.filter(a => !a.includes(':')).join(', ');
@@ -119,7 +122,7 @@ export class BalenaDeviceItem extends vscode.TreeItem {
         
         this.children = [];
 
-        getDeviceInfo(host, (newInfo) => {
+        getDeviceInfo(this.address, (newInfo) => {
             this.deviceInfo = {
                 ...this.deviceInfo,
                 ...newInfo,
