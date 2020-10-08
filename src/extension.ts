@@ -5,7 +5,7 @@ import * as scan from './lib/scan';
 
 import BalenaDevicesDataProvider, { BalenaDeviceItem } from './providers/balena-devices-treedata';
 import BalenaPanelManager from './panels/balena-panel-manager';
-import { livePush, logs, ssh } from './lib/commands';
+import { livePush, logs, reset, ssh } from './lib/commands';
 
 (async () => {
 	await scan.initialized;
@@ -25,6 +25,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('balena.logs', logs)
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('balena.reset', reset)
 	);
 
 	context.subscriptions.push(
