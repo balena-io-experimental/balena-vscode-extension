@@ -62,7 +62,7 @@
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile && npm run lint",
 		"test": "node ./out/test/runTest.js",
-		"package": "vsce package"
+		"package": "vsce package -o balena-vscode.vsix"
 	},
 	"devDependencies": {
 		"@types/bonjour": "^3.5.7",
