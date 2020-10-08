@@ -1,6 +1,7 @@
 {
 	"name": "balena-vscode",
 	"publisher": "balena",
+	"repository": "https://github.com/balena-io-playground/balena-vscode-extension",
 	"displayName": "balena-vscode",
 	"description": "Balena in VSCode",
 	"version": "0.0.1",
