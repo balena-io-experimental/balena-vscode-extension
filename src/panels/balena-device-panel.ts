@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 import * as vscode from 'vscode';
 
-import { icons, scripts } from '../lib/resources';
+import { deviceIcon, icons, scripts } from '../lib/resources';
 import { livePush, reset, ssh } from '../lib/commands';
 import { BalenaDeviceItem } from '../providers/balena-devices-treedata';
 
@@ -21,7 +21,7 @@ export default class BalenaDevicePanel extends EventEmitter {
       }
     );
     this.panel.webview.html = this.getHtmlForWebview();
-    this.panel.iconPath = vscode.Uri.file(icons.balena);
+    this.panel.iconPath = vscode.Uri.file(deviceIcon(device.deviceInfo.deviceType ?? 'unknown'));
     this.panel.onDidDispose(() => this.emit('disposed', this.device.name));
     this.panel.webview.onDidReceiveMessage(
       message => {
