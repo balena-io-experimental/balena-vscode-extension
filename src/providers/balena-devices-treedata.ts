@@ -14,15 +14,15 @@ interface Collection<T> {
 
 export default class BalenaDevicesDataProvider implements vscode.TreeDataProvider<TreeableItem> {
     private devices: Collection<BalenaDeviceItem> = {};
-    
+
     _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
-    
+
     constructor() {
 
         scan.getDevices().forEach(({ name, host, addresses }) => {
             this.devices[host] = new BalenaDeviceItem(name, host, addresses);
         });
-        
+
         scan.events.on('deviceFound', (device) => {
             this.handleDeviceFound(device);
         });
@@ -53,7 +53,7 @@ export default class BalenaDevicesDataProvider implements vscode.TreeDataProvide
     }
 
     onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
-    
+
     getTreeItem(element: TreeableItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element;
     }
@@ -103,10 +103,15 @@ class GroupItem extends vscode.TreeItem {
 export class BalenaDeviceItem extends vscode.TreeItem {
     constructor(public name: string, public host: string, public addresses: string[]) {
         super(name);
-        
+
         this.description = addresses.filter(a => !a.includes(':')).join(', ');
         this.iconPath = deviceIcon('generic');
         this.contextValue = 'unknown-device';
+        this.command = {
+            command: 'balena.openDevicePanel',
+            title: 'Open balena device panel',
+            arguments: [name, host, addresses]
+        };
     }
 
     public getDeviceInfo(done: Function): Promise<void> {
@@ -126,8 +131,8 @@ export class BalenaDeviceItem extends vscode.TreeItem {
 }
 
 class BalenaDeviceService extends vscode.TreeItem {
-    static getServiceName(port: number):string {
-        switch(port) {
+    static getServiceName(port: number): string {
+        switch (port) {
             case 22:
             case 22222:
                 return 'SSH';
