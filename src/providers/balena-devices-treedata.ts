@@ -1,9 +1,9 @@
+import { env } from 'process';
 import * as vscode from 'vscode';
 
 import * as scan from '../lib/scan';
 import { icons, deviceIcon } from '../lib/resources';
 import { getDeviceInfo, DeviceInfo } from '../lib/device-info';
-import { logs } from '../lib/commands';
 
 (async () => {
     await scan.initialized;
@@ -63,10 +63,12 @@ export default class BalenaDevicesDataProvider implements vscode.TreeDataProvide
     getChildren(element?: TreeableItem): vscode.ProviderResult<TreeableItem[]> {
         if (element === undefined) {
             const devices = Object.getOwnPropertyNames(this.devices).map(k => this.devices[k]);
+            const [self] = devices.filter(d => d.name === env.HOSTNAME ?? '');
             
             return [
+                self,
                 new GroupItem('Local', devices, { icon: icons.balena }),
-                new GroupItem('Remote', [
+                new GroupItem('Cloud', [
                     new GroupItem('Applications', [
                         new GroupItem('my-new-hotness', [], { icon: deviceIcon('raspberrypi4-64') }),
                         new GroupItem('my-old-busted', [], { icon: deviceIcon('raspberrypi3') }),
