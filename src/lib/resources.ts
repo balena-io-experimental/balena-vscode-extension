@@ -6,6 +6,7 @@ function getPath(imagePath: string) {
 
 export const icons = {
     balena: getPath('icons/balena.png'),
+    balenaDark: getPath('icons/balena-dark.png'),
 };
 
 export const deviceIcon = (deviceType: string) => getPath(`devices/${deviceType}.svg`);

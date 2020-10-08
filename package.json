@@ -21,12 +21,14 @@
 			{
 				"command": "balena.livePush",
 				"title": "LivePush",
-				"icon": "resources/icons/livepush.svg"
+				"icon": "resources/icons/livepush.svg",
+				"category": "balena"
 			},
 			{
 				"command": "balena.ssh",
 				"title": "SSH",
-				"icon": "resources/icons/terminal.svg"
+				"icon": "resources/icons/terminal.svg",
+				"category": "balena"
 			}
 		],
 		"views": {
